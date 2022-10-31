@@ -5,6 +5,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Scanner;
 
@@ -12,7 +13,9 @@ public class MainWind extends JFrame {
     Scanner scan = new Scanner(System.in);
     private JPane canvas;
 
-    int initialWidth = 180, initialHeight = 150;
+    int initialWidth, initialHeight, Z;
+    int a, alg, period, mcsteps;
+    double kt;
     private JPanel mainPanel;
     private JPanel generalPanel;
 
@@ -24,7 +27,23 @@ public class MainWind extends JFrame {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        canvas = new JPane(image, initialWidth, initialHeight);
+        try {
+            File myObj = new File("parameters.txt");
+            Scanner myReader = new Scanner(myObj);
+            initialWidth = (Integer.parseInt(myReader.nextLine()));
+            initialHeight = (Integer.parseInt(myReader.nextLine()));
+            Z = (Integer.parseInt(myReader.nextLine()));
+            a = (Integer.parseInt(myReader.nextLine()));
+            alg = (Integer.parseInt(myReader.nextLine()));
+            period = (Integer.parseInt(myReader.nextLine()));
+            kt = (Double.parseDouble(myReader.nextLine()));
+            mcsteps = (Integer.parseInt(myReader.nextLine()));
+            myReader.close();
+        } catch (FileNotFoundException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+        canvas = new JPane(image, initialWidth, initialHeight, Z);
 
         // =============================================================================================================
 
@@ -45,29 +64,20 @@ public class MainWind extends JFrame {
         this.setSize(new Dimension(200, 200));
         this.setLocationRelativeTo(null);
         setPreferredSize(new Dimension(200, 180));
-        int a = 0;
-        canvas.Z=20;
-        System.out.println("Choose number of generated grains:");
-        String liczb=scan.nextLine();
-        a = (Integer.parseInt(liczb));
         canvas.zad.generateRandom(a);
-        System.out.println("Choose way to generate neighbours: Neumann - select 0, Moore - select 1");
-        String neighbourWay=scan.nextLine();
-        int alg=(Integer.parseInt(neighbourWay));
         canvas.setAlgorithm(alg);
-        System.out.println("Do you want periodic - select 1, non-periodic - select 0");
-        int period=(Integer.parseInt(scan.nextLine()));
-        if(period==0)
+
+        if (period == 0)
             canvas.setPeriodic(false);
         else
             canvas.setPeriodic(true);
         System.out.println("Start generating");
-       // repaint();
+        // repaint();
         canvas.czyCzasPlynie = true;
         canvas.millisActualTime = System.currentTimeMillis();
-        canvas.zad.neighbourAlgorithm.possibleColors = canvas.zad.colors.toArray(new Color[0]);
-
-        //canvas.stepper(initialHeight,initialWidth);
+        canvas.zad.kt = kt;
+        canvas.zad.remainingMCSteps = mcsteps;
+        // canvas.stepper(initialHeight,initialWidth);
     }
 
     public static void main(String[] args) throws IOException {

@@ -42,6 +42,7 @@ public class MonteCarlo {
             int z = randZ.get(randomIndex);
             randX.remove(randomIndex);
             randY.remove(randomIndex);
+            randZ.remove(randomIndex);
             if (edges[y][x][z]) {
                 int energyNOW = calculateEnergy(x, y, z, tab[y][x][z]);
                 Color bestColor = tab[y][x][z];
@@ -49,7 +50,7 @@ public class MonteCarlo {
                 Color[] nc = neighbourAlgorithm.getNeighboursColors(x, y, z, tab[y][x][z]);
                 if (nc.length > 0) {
                     Color col = nc[rand.nextInt(nc.length)];
-                    int hypotheticalEnergy = calculateEnergy(x, y,z, col);
+                    int hypotheticalEnergy = calculateEnergy(x, y, z, col);
                     if (hypotheticalEnergy <= lowestEnergy) {
                         bestColor = col;
                     } else {

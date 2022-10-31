@@ -8,44 +8,54 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Scanner;
 
 public class JPane extends JPanel implements ActionListener {
-    int Z;
+    Scanner scan = new Scanner(System.in);
     int whiteRgb = Color.WHITE.getRGB();
     public int cellSize;
     private BufferedImage image;
     public Zad zad;
     int change, war2 = 0, fulfillness = 0, full = 0;
+    String mc = "no";
     Timer timer = new Timer(400, (ActionListener) this);
     public boolean czyCzasPlynie = true;
     public boolean periodic;
     public int algorithmType;
     BufferedWriter writer;
+    BufferedWriter MCwrite;
+    BufferedWriter Json;
     public long millisActualTime;
+    double millis;
 
-    public JPane(BufferedImage image, int initialWidth, int initialHeight) throws IOException {
+    public JPane(BufferedImage image, int initialWidth, int initialHeight, int Z) throws IOException {
+        millisActualTime = System.currentTimeMillis();
         this.image = image;
         setNewZad(initialWidth, initialHeight, Z);
         repaint();
         startTime();
-
+        millis = System.currentTimeMillis() - millisActualTime;
+        System.out.printf("Time to generate xyz: " + millis + " ms");
+        System.out.println();
         writer = new BufferedWriter(new FileWriter("generated.txt"));
+        MCwrite = new BufferedWriter(new FileWriter("MCgenerated.txt"));
+        Json = new BufferedWriter(new FileWriter("Times.json"));
+
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        if (zad.neighbourAlgorithm.possibleColors == null)
+            zad.neighbourAlgorithm.possibleColors = zad.colors.toArray(new Color[0]);
         if (e.getSource() == timer) {
             if (czyCzasPlynie) {
                 zad.stepNeighbour();
+            } else if (zad.remainingMCSteps > 0) {
+                zad.doMonteCarlo();
+                zad.remainingMCSteps--;
+                if (zad.remainingMCSteps == 0)
+                    mc = "yes";
             }
-            repaint();
-        }
-    }
-
-    public void stepper(int initialHeight,int initialWidth){
-        setNewZad(initialWidth, initialHeight, Z);
-        while(czyCzasPlynie){
-            zad.stepNeighbour();
             repaint();
         }
     }
@@ -63,30 +73,20 @@ public class JPane extends JPanel implements ActionListener {
     }
 
     protected void paintComponent(Graphics g) {
-       // super.paintComponent(g);
-        //Graphics2D g2 = (Graphics2D) g;
-        /*if (zad.width > 0 && zad.height > 0)
-            //g2.drawImage(image, 0, 0, zad.width * cellSize,
-                    zad.height * cellSize, Color.black, this);
-        else if (zad.width == 0 & zad.height == 0)
-            g2.drawImage(image, 0, 0, this);
-*/
         for (int j = 0; j < zad.height; j++) {
             for (int i = 0; i < zad.width; i++) {
                 for (int k = 0; k < zad.Z; k++) {
 
-                    //g2.setColor(zad.tab[j][i][k]);
                     if (zad.tab[j][i][k].equals(Color.WHITE)) {
                         fulfillness++;
                     }
-
-                    //g2.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
                 }
             }
         }
         if (fulfillness == 0 && full == 0) {
             double executionTime = System.currentTimeMillis() - millisActualTime;
             System.out.println("Timer value:  " + executionTime / 1000 + "s");
+            millisActualTime = System.currentTimeMillis();
             for (int j = 0; j < zad.height; j++) {
                 for (int i = 0; i < zad.width; i++) {
                     for (int k = 0; k < zad.Z; k++) {
@@ -100,16 +100,48 @@ public class JPane extends JPanel implements ActionListener {
                 }
             }
             try {
-                writer.close();
+
+                double writeTime = System.currentTimeMillis() - millisActualTime;
                 System.out.println(".txt file have been generated");
-                czyCzasPlynie=false;
+                System.out.println("Time to write file: " + writeTime + " ms");
+                writer.close();
+                czyCzasPlynie = false;
+                Json.write("Time to generate xyz: " + millis + " ms");
+                Json.newLine();
+                Json.write("Timer value:  " + executionTime / 1000 + "s");
+                Json.newLine();
+                Json.write("Time to write file: " + writeTime + " ms");
+                Json.close();
             } catch (IOException ioException) {
                 ioException.printStackTrace();
             }
             full++;
-        } else {
+        } else if (full == 0) {
             fulfillness = 0;
         }
+        if (full == 1 && mc == "yes") {
+            for (int j = 0; j < zad.height; j++) {
+                for (int i = 0; i < zad.width; i++) {
+                    for (int k = 0; k < zad.Z; k++) {
+                        try {
+                            MCwrite.write(i + " " + j + " " + k + " " + zad.tab[j][i][k]);
+                            MCwrite.newLine();
+                        } catch (IOException ioException) {
+                            ioException.printStackTrace();
+                        }
+                    }
+                }
+            }
+            try {
+                MCwrite.close();
+                System.out.println("MC.txt file have been generated");
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+            mc = "no";
+            full++;
+        }
+
     }
 
     void setCellSize() {

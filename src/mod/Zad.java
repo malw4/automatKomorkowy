@@ -19,11 +19,15 @@ public class Zad {
     int colorIndex = 0;
     public NeighbourAlgorithm neighbourAlgorithm;
 
+    MonteCarlo monteCarlo;
+    public double kt = 0.1;
+    public int remainingMCSteps = 0;
     Zad(int w, int h, int z) {
         width = w;
         height = h;
         Z = z;
         neighbourAlgorithm = new VonNeumanNeighbour(width, height, Z, isFlow);
+        monteCarlo = new MonteCarlo(neighbourAlgorithm, width, height,Z);
         ClearTabs();
     }
 
@@ -41,6 +45,8 @@ public class Zad {
         colorIndex = 0;
         neighbourAlgorithm.isPeriodic = isFlow;
         colors.clear();
+
+        monteCarlo = new MonteCarlo(neighbourAlgorithm, width, height,Z);
     }
 
     void createColoredBud(int x, int y, int z) {
@@ -74,7 +80,7 @@ public class Zad {
                 neighbourAlgorithm = new VonNeumanNeighbour(width, height, Z, isFlow);
                 break;
             case 1:
-             //   neighbourAlgorithm = new MooreNeighbour(width, height,Z, isFlow);
+                neighbourAlgorithm = new MooreNeighbour(width, height,Z, isFlow);
                 break;
         }
         //monteCarlo.neighbourAlgorithm = neighbourAlgorithm;
@@ -85,9 +91,12 @@ public class Zad {
     }
 
     public void makeEdgesTab() {
+        monteCarlo.makeEdgesTab(tab);
     }
 
     public void doMonteCarlo() {
         neighbourAlgorithm.colorsTab = tab;
+        monteCarlo.makeEdgesTab(tab);
+        tab = monteCarlo.doMonteCarlo(tab, kt);
     }
 }
