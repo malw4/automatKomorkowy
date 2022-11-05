@@ -34,12 +34,6 @@ public abstract class NeighbourAlgorithm {
             for (int i = 0; i < width; i++) {
                 for (int k = 0; k < Z; k++) {
                     newTab[j][i][k] = colorsTab[j][i][k];
-                }
-            }
-        }
-        for (int j = 0; j < height; j++) {
-            for (int i = 0; i < width; i++) {
-                for (int k = 0; k < Z; k++) {
                     if (newTab[j][i][k].equals(neutralColor)) {
                         newTab[j][i][k] = decideCell(i, j, k);
                     }
@@ -70,16 +64,16 @@ public abstract class NeighbourAlgorithm {
     }
 
     // returns count of neighbours with color different than color passed in argument
-    public abstract int getEnergy(int x, int y,int z, Color color);
+    public abstract int getEnergy(int x, int y, int z, Color color);
 
     // checks if there are neighbours with color different than color passed in argument
-    public abstract boolean isEdge(int x, int y,int z, Color color);
+    public abstract boolean isEdge(int x, int y, int z, Color color);
 
     // returns color which most of neighbours have (but not neutral)
-    protected abstract Color decideCell(int x, int y,int z);
+    protected abstract Color decideCell(int x, int y, int z);
 
     // returns array of colors of all neighbours (without repetitions)
-    public abstract Color[] getNeighboursColors(int x, int y,int z, Color myColor);
+    public abstract Color[] getNeighboursColors(int x, int y, int z, Color myColor);
 
-    public abstract Integer[][][] getNeighbours(int x, int y,int z);
+    public abstract Integer[][][] getNeighbours(int x, int y, int z);
 }

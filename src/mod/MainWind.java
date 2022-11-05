@@ -10,14 +10,10 @@ import java.io.IOException;
 import java.util.Scanner;
 
 public class MainWind extends JFrame {
-    Scanner scan = new Scanner(System.in);
-    private JPane canvas;
 
     int initialWidth, initialHeight, Z;
     int a, alg, period, mcsteps;
     double kt;
-    private JPanel mainPanel;
-    private JPanel generalPanel;
 
     public MainWind(String title) throws IOException {
         super(title);
@@ -43,15 +39,15 @@ public class MainWind extends JFrame {
             System.out.println("An error occurred.");
             e.printStackTrace();
         }
-        canvas = new JPane(image, initialWidth, initialHeight, Z);
+        JPane canvas = new JPane(image, initialWidth, initialHeight, Z);
 
         // =============================================================================================================
 
-        mainPanel = new JPanel();
+        JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout());
         mainPanel.add(BorderLayout.CENTER, canvas);
 
-        generalPanel = new JPanel();
+        JPanel generalPanel = new JPanel();
         generalPanel.setPreferredSize(new Dimension(180, 180));
 
         mainPanel.add(BorderLayout.EAST, generalPanel);
@@ -67,10 +63,7 @@ public class MainWind extends JFrame {
         canvas.zad.generateRandom(a);
         canvas.setAlgorithm(alg);
 
-        if (period == 0)
-            canvas.setPeriodic(false);
-        else
-            canvas.setPeriodic(true);
+        canvas.setPeriodic(period != 0);
         System.out.println("Start generating");
         // repaint();
         canvas.czyCzasPlynie = true;
@@ -84,4 +77,5 @@ public class MainWind extends JFrame {
         MainWind window = new MainWind("ZIARNA");
         window.setVisible(true);
     }
+
 }

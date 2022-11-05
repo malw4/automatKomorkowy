@@ -18,7 +18,7 @@ public class JPane extends JPanel implements ActionListener {
     public Zad zad;
     int change, war2 = 0, fulfillness = 0, full = 0;
     String mc = "no";
-    Timer timer = new Timer(400, (ActionListener) this);
+    Timer timer = new Timer(400, this);
     public boolean czyCzasPlynie = true;
     public boolean periodic;
     public int algorithmType;
@@ -119,7 +119,7 @@ public class JPane extends JPanel implements ActionListener {
         } else if (full == 0) {
             fulfillness = 0;
         }
-        if (full == 1 && mc == "yes") {
+        if (full == 1 && mc.equals("yes")) {
             for (int j = 0; j < zad.height; j++) {
                 for (int i = 0; i < zad.width; i++) {
                     for (int k = 0; k < zad.Z; k++) {

@@ -231,9 +231,7 @@ public class MooreNeighbour extends NeighbourAlgorithm {
                 return true;
             if (!thisColor.equals(colorsTab[y][(x - 1 + width) % width][z]))
                 return true;
-            if (!thisColor.equals(colorsTab[(y + 1) % height][(x - 1 + width) % width][z]))
-                return true;
-            return false;
+            return !thisColor.equals(colorsTab[(y + 1) % height][(x - 1 + width) % width][z]);
         } else {
             if ((z + 1 < Z) && !thisColor.equals(colorsTab[y ][x][z+1]))
                 return true;
@@ -261,9 +259,7 @@ public class MooreNeighbour extends NeighbourAlgorithm {
                 return true;
             if ((x - 1 >= 0) && !thisColor.equals(colorsTab[y][x - 1][z]))
                 return true;
-            if ((y + 1 < height && x - 1 >= 0) && !thisColor.equals(colorsTab[y + 1][x - 1][z]))
-                return true;
-            return false;
+            return (y + 1 < height && x - 1 >= 0) && !thisColor.equals(colorsTab[y + 1][x - 1][z]);
         }
     }
 

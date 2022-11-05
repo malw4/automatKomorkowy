@@ -135,8 +135,7 @@ public class VonNeumanNeighbour extends NeighbourAlgorithm {
                 return true;
             if (!thisColor.equals(colorsTab[y][(x - 1 + width) % width][z]))
                 return true;
-            if (!thisColor.equals(colorsTab[y][x][(z - 1 + Z) % Z]))
-                return true;
+            return !thisColor.equals(colorsTab[y][x][(z - 1 + Z) % Z]);
         } else {
             if ((y + 1 < height) && !thisColor.equals(colorsTab[y + 1][x][z]))
                 return true;
@@ -148,10 +147,8 @@ public class VonNeumanNeighbour extends NeighbourAlgorithm {
                 return true;
             if ((x - 1 >= 0) && !thisColor.equals(colorsTab[y][x - 1][z]))
                 return true;
-            if ((z - 1 >= 0) && !thisColor.equals(colorsTab[y][x][z - 1]))
-                return true;
+            return (z - 1 >= 0) && !thisColor.equals(colorsTab[y][x][z - 1]);
         }
-        return false;
     }
 
     @Override
