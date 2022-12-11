@@ -5,58 +5,60 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.Scanner;
 
 public class JPane extends JPanel implements ActionListener {
     Scanner scan = new Scanner(System.in);
-    int whiteRgb = Color.WHITE.getRGB();
+    int width, height, Z;
+    int whiteRgb =0;
     public int cellSize;
     private BufferedImage image;
     public Zad zad;
-    int change, war2 = 0, fulfillness = 0, full = 0;
+    int change, war2 = 0, fulfillness = 0, full = 0, val = 0;
     String mc = "no";
     Timer timer = new Timer(400, this);
-    public boolean czyCzasPlynie = true;
+    public boolean czyCzasPlynie = false;
     public boolean periodic;
     public int algorithmType;
     BufferedWriter writer;
     BufferedWriter MCwrite;
     BufferedWriter Json;
+    BufferedWriter MCJson;
     public long millisActualTime;
-    double millis;
+    double millis,mcexectime,mcexec=1;
 
-    public JPane(BufferedImage image, int initialWidth, int initialHeight, int Z) throws IOException {
+    public JPane(BufferedImage image, int initialWidth, int initialHeight, int z) throws IOException {
         millisActualTime = System.currentTimeMillis();
         this.image = image;
-        setNewZad(initialWidth, initialHeight, Z);
+        setNewZad(initialWidth, initialHeight, z);
+        width = initialWidth;
+        height = initialHeight;
+        Z = z;
         repaint();
         startTime();
         millis = System.currentTimeMillis() - millisActualTime;
         System.out.printf("Time to generate xyz: " + millis + " ms");
         System.out.println();
-        writer = new BufferedWriter(new FileWriter("generated.txt"));
-        MCwrite = new BufferedWriter(new FileWriter("MCgenerated.txt"));
-        Json = new BufferedWriter(new FileWriter("Times.json"));
-
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (zad.neighbourAlgorithm.possibleColors == null)
-            zad.neighbourAlgorithm.possibleColors = zad.colors.toArray(new Color[0]);
         if (e.getSource() == timer) {
             if (czyCzasPlynie) {
                 zad.stepNeighbour();
             } else if (zad.remainingMCSteps > 0) {
+                if(mcexec>0) {
+                    mcexectime = System.currentTimeMillis() - millisActualTime;
+                    mcexec--;
+                }
                 zad.doMonteCarlo();
                 zad.remainingMCSteps--;
                 if (zad.remainingMCSteps == 0)
                     mc = "yes";
             }
-            repaint();
+            revalidate();
+            paintComponent();
         }
     }
 
@@ -72,12 +74,11 @@ public class JPane extends JPanel implements ActionListener {
         timer.start();
     }
 
-    protected void paintComponent(Graphics g) {
+    protected void paintComponent() {
         for (int j = 0; j < zad.height; j++) {
             for (int i = 0; i < zad.width; i++) {
                 for (int k = 0; k < zad.Z; k++) {
-
-                    if (zad.tab[j][i][k].equals(Color.WHITE)) {
+                    if (zad.tab[j][i][k] == 0) {
                         fulfillness++;
                     }
                 }
@@ -100,8 +101,8 @@ public class JPane extends JPanel implements ActionListener {
                 }
             }
             try {
-
                 double writeTime = System.currentTimeMillis() - millisActualTime;
+                millisActualTime = System.currentTimeMillis();
                 System.out.println(".txt file have been generated");
                 System.out.println("Time to write file: " + writeTime + " ms");
                 writer.close();
@@ -116,10 +117,14 @@ public class JPane extends JPanel implements ActionListener {
                 ioException.printStackTrace();
             }
             full++;
+            if(val==1)
+                System.exit(0);
         } else if (full == 0) {
             fulfillness = 0;
         }
         if (full == 1 && mc.equals("yes")) {
+            mcexectime=System.currentTimeMillis() - millisActualTime;
+            millisActualTime = System.currentTimeMillis();
             for (int j = 0; j < zad.height; j++) {
                 for (int i = 0; i < zad.width; i++) {
                     for (int k = 0; k < zad.Z; k++) {
@@ -134,14 +139,19 @@ public class JPane extends JPanel implements ActionListener {
             }
             try {
                 MCwrite.close();
+                double mcwriteTime = System.currentTimeMillis() - millisActualTime;
                 System.out.println("MC.txt file have been generated");
+                MCJson.write("Timer value:  " + mcexectime / 1000 + "s");
+                MCJson.newLine();
+                MCJson.write("Time to write file: " + mcwriteTime + " ms");
+                MCJson.close();
             } catch (IOException ioException) {
                 ioException.printStackTrace();
             }
             mc = "no";
             full++;
+            System.exit(0);
         }
-
     }
 
     void setCellSize() {

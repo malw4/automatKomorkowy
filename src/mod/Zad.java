@@ -6,15 +6,15 @@ import java.awt.*;
 import java.util.*;
 
 public class Zad {
-    public int height, width, Z, maxCount = 100;
+    int val0;
+    public int height, width, Z,seed, maxCount = 100;
     boolean isFlow;
-    public Color[][][] tab;
-
+    public int[][][] tab; //value of rgb
     public boolean visualizeEnergies = false;
     public boolean visualizeBabies = false;
     int[][][] energies;
     double[][][] densities;
-    public ArrayList<Color> colors = new ArrayList<Color>();
+    public ArrayList<Integer> colors = new ArrayList<Integer>();
     Random rand = new Random();
     int colorIndex = 0;
     public NeighbourAlgorithm neighbourAlgorithm;
@@ -26,50 +26,45 @@ public class Zad {
         width = w;
         height = h;
         Z = z;
-        neighbourAlgorithm = new VonNeumanNeighbour(width, height, Z, isFlow);
+        neighbourAlgorithm = new VonNeumanNeighbour(width, height, Z, isFlow, seed);
         monteCarlo = new MonteCarlo(neighbourAlgorithm, width, height,Z);
+        val0=NeighbourAlgorithm.neutralColor;
         ClearTabs();
     }
 
     private void ClearTabs() {
-        tab = new Color[height][width][Z];
+        tab = new int[height][width][Z];
         energies = new int[height][width][Z];
         densities = new double[height][width][Z];
         for (int j = 0; j < height; j++) {
             for (int i = 0; i < width; i++) {
                 for (int k = 0; k < Z; k++) {
-                    tab[j][i][k] = NeighbourAlgorithm.neutralColor;
+                    tab[j][i][k] = val0;
                 }
             }
         }
         colorIndex = 0;
         neighbourAlgorithm.isPeriodic = isFlow;
         colors.clear();
-
         monteCarlo = new MonteCarlo(neighbourAlgorithm, width, height,Z);
     }
 
-    void createColoredBud(int x, int y, int z) {
-        Color col;
-        do {
-            int r = rand.nextInt(256);
-            int g = rand.nextInt(256);
-            int b = rand.nextInt(256);
-            col = new Color(r, g, b);
-        } while (colors.indexOf(col) >= 0 || col.equals(NeighbourAlgorithm.neutralColor));
+    void createColoredBud(int x, int y, int z, int color) {
+        int col = color;
         colors.add(col);
         tab[y][x][z] = col;
     }
 
     public void generateRandom(int n) {
         ClearTabs();
+        seed=n;
         n = Math.min(n, width * height*Z);
         int i = 0;
         while (i < n) {
             int randX = rand.nextInt(width);
             int randY = rand.nextInt(height);
             int randZ = rand.nextInt(Z);
-            createColoredBud(randX, randY, randZ);
+            createColoredBud(randX, randY, randZ, i + 1);
             i++;
         }
     }
@@ -77,10 +72,10 @@ public class Zad {
     public void changeAlgorithm(int alg) {
         switch (alg) {
             case 0:
-                neighbourAlgorithm = new VonNeumanNeighbour(width, height, Z, isFlow);
+                neighbourAlgorithm = new VonNeumanNeighbour(width, height, Z, isFlow,seed);
                 break;
             case 1:
-                neighbourAlgorithm = new MooreNeighbour(width, height,Z, isFlow);
+                neighbourAlgorithm = new MooreNeighbour(width, height,Z, isFlow,seed);
                 break;
         }
         //monteCarlo.neighbourAlgorithm = neighbourAlgorithm;

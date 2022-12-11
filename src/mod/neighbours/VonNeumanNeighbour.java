@@ -1,23 +1,22 @@
 package mod.neighbours;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.*;
 import java.util.List;
-import java.util.Set;
 
 public class VonNeumanNeighbour extends NeighbourAlgorithm {
 
-    public VonNeumanNeighbour(int w, int h, int z, boolean isPeriod) {
+    public VonNeumanNeighbour(int w, int h, int z, boolean isPeriod, int seeds) {
         width = w;
         height = h;
         Z = z;
         isPeriodic = isPeriod;
+        seedsCount = seeds;
     }
 
     @Override
-    protected Color decideCell(int x, int y, int z) {
-        Color[] neighbours = new Color[6];
+    protected int decideCell(int x, int y, int z) {
+        int[] neighbours = new int[6];
         int j = 0;
         if (isPeriodic) {
             neighbours[j++] = colorsTab[(y - 1 + height) % height][x][z];
@@ -34,61 +33,56 @@ public class VonNeumanNeighbour extends NeighbourAlgorithm {
             neighbours[j++] = (z - 1 < 0) ? neutralColor : colorsTab[y][x][z - 1];
             neighbours[j++] = (z + 1 < Z) ? colorsTab[y][x][z + 1] : neutralColor;
         }
-        int[] colorCounts = new int[possibleColors.length];
-        for (Color neighbour : neighbours) {
-            for (int i = 0; i < possibleColors.length; i++) {
-                if (neighbour.equals(possibleColors[i])) {
-                    colorCounts[i]++;
-                    break;
-                }
+        Map<Integer, Integer> neighboursNumbers = new HashMap();
+        for (int neighbour : neighbours) {
+            if (neighboursNumbers.containsKey(neighbour) == false){
+                neighboursNumbers.put(neighbour, 0);
             }
+            int count = neighboursNumbers.get(neighbour) + 1;
+            neighboursNumbers.put(neighbour, count);
         }
-        try {
-            int maxIndex = getIndexOfMax(colorCounts);
-            return possibleColors[maxIndex];
-        } catch (Exception e) {
-            return neutralColor;
-        }
+
+        return getIndexOfMax(neighboursNumbers);
     }
 
     @Override
-    public Color[] getNeighboursColors(int x, int y, int z, Color myColor) {
-        Set<Color> colorSet = new HashSet<>();
+    public int[] getNeighboursColors(int x, int y, int z, int myColor) {
+        Set<Integer> colorSet = new HashSet<>();
         if (isPeriodic) {
-            if (isEdge(x, (y + 1) % height,z, myColor) && !myColor.equals(colorsTab[(y + 1) % height][x][z]))
+            if (isEdge(x, (y + 1) % height,z, myColor) && myColor!=colorsTab[(y + 1) % height][x][z])
                 colorSet.add(colorsTab[(y + 1) % height][x][z]);
-            if (isEdge((x + 1) % width, y,z, myColor) && !myColor.equals(colorsTab[y][(x + 1) % width][z]))
+            if (isEdge((x + 1) % width, y,z, myColor) && myColor!=colorsTab[y][(x + 1) % width][z])
                 colorSet.add(colorsTab[y][(x + 1) % width][z]);
-            if (isEdge(x, y, (z + 1) % Z, myColor) && !myColor.equals(colorsTab[y][x][(z + 1) % Z]))
+            if (isEdge(x, y, (z + 1) % Z, myColor) && myColor!=colorsTab[y][x][(z + 1) % Z])
                 colorSet.add(colorsTab[y][x][(z + 1) % Z]);
-            if (isEdge(x, (y - 1 + height) % height,z, myColor) && !myColor.equals(colorsTab[(y - 1 + height) % height][x][z]))
+            if (isEdge(x, (y - 1 + height) % height,z, myColor) && myColor!=colorsTab[(y - 1 + height) % height][x][z])
                 colorSet.add(colorsTab[(y - 1 + height) % height][x][z]);
-            if (isEdge((x - 1 + width) % width, y,z, myColor) && !myColor.equals(colorsTab[y][(x - 1 + width) % width][z]))
+            if (isEdge((x - 1 + width) % width, y,z, myColor) && myColor!=colorsTab[y][(x - 1 + width) % width][z])
                 colorSet.add(colorsTab[y][(x - 1 + width) % width][z]);
-            if (isEdge(x, y, (z - 1 + Z) % Z, myColor) && !myColor.equals(colorsTab[y][x][(z - 1 + Z) % Z]))
+            if (isEdge(x, y, (z - 1 + Z) % Z, myColor) && myColor!=colorsTab[y][x][(z - 1 + Z) % Z])
                 colorSet.add(colorsTab[y][x][(z - 1 + Z) % Z]);
         } else {
-            if ((y + 1 < height) && isEdge(x, y + 1, z, myColor) && !myColor.equals(colorsTab[y + 1][x][z]))
+            if ((y + 1 < height) && isEdge(x, y + 1, z, myColor) && myColor!=colorsTab[y + 1][x][z])
                 colorSet.add(colorsTab[y + 1][x][z]);
-            if ((x + 1 < width) && isEdge(x + 1, y, z, myColor) && !myColor.equals(colorsTab[y][x + 1][z]))
+            if ((x + 1 < width) && isEdge(x + 1, y, z, myColor) && myColor!=colorsTab[y][x + 1][z])
                 colorSet.add(colorsTab[y][x + 1][z]);
-            if ((z + 1 < Z) && isEdge(x, y, z + 1, myColor) && !myColor.equals(colorsTab[y][x][z + 1]))
+            if ((z + 1 < Z) && isEdge(x, y, z + 1, myColor) && myColor!=colorsTab[y][x][z + 1])
                 colorSet.add(colorsTab[y][x][z + 1]);
-            if ((y - 1 >= 0) && isEdge(x, y - 1, z, myColor) && !myColor.equals(colorsTab[y - 1][x][z]))
+            if ((y - 1 >= 0) && isEdge(x, y - 1, z, myColor) && myColor!=colorsTab[y - 1][x][z])
                 colorSet.add(colorsTab[y - 1][x][z]);
-            if ((x - 1 >= 0) && isEdge(x - 1, y, z, myColor) && !myColor.equals(colorsTab[y][x - 1][z]))
+            if ((x - 1 >= 0) && isEdge(x - 1, y, z, myColor) && myColor!=colorsTab[y][x - 1][z])
                 colorSet.add(colorsTab[y][x - 1][z]);
-            if ((z - 1 >= 0) && isEdge(x, y, z - 1, myColor) && !myColor.equals(colorsTab[y][x][z - 1]))
+            if ((z - 1 >= 0) && isEdge(x, y, z - 1, myColor) && myColor!=colorsTab[y][x][z - 1])
                 colorSet.add(colorsTab[y][x][z - 1]);
         }
-        return colorSet.toArray(new Color[colorSet.size()]);
+        return new int[0];
     }
 
 
     @Override
-    public int getEnergy(int x, int y, int z, Color color) {
+    public int getEnergy(int x, int y, int z, int color) {
         int energy = 0;
-        Color myRealColor = colorsTab[y][x][z];
+      int myRealColor = colorsTab[y][x][z];
         colorsTab[y][x][z] = color;
         if (isPeriodic) {
             if (isEdge(x, (y + 1) % height, z))
@@ -122,32 +116,32 @@ public class VonNeumanNeighbour extends NeighbourAlgorithm {
     }
 
     @Override
-    public boolean isEdge(int x, int y, int z, Color color) {
-        Color thisColor = color;
+    public boolean isEdge(int x, int y, int z, int color) {
+      int thisColor = color;
         if (isPeriodic) {
-            if (!thisColor.equals(colorsTab[(y + 1) % height][x][z]))
+            if (thisColor!=colorsTab[(y + 1) % height][x][z])
                 return true;
-            if (!thisColor.equals(colorsTab[y][(x + 1) % width][z]))
+            if (thisColor!=colorsTab[y][(x + 1) % width][z])
                 return true;
-            if (!thisColor.equals(colorsTab[y][x][(z + 1) % Z]))
+            if (thisColor!=colorsTab[y][x][(z + 1) % Z])
                 return true;
-            if (!thisColor.equals(colorsTab[(y - 1 + height) % height][x][z]))
+            if (thisColor!=colorsTab[(y - 1 + height) % height][x][z])
                 return true;
-            if (!thisColor.equals(colorsTab[y][(x - 1 + width) % width][z]))
+            if (thisColor!=colorsTab[y][(x - 1 + width) % width][z])
                 return true;
-            return !thisColor.equals(colorsTab[y][x][(z - 1 + Z) % Z]);
+            return thisColor!=colorsTab[y][x][(z - 1 + Z) % Z];
         } else {
-            if ((y + 1 < height) && !thisColor.equals(colorsTab[y + 1][x][z]))
+            if ((y + 1 < height) && thisColor!=colorsTab[y + 1][x][z])
                 return true;
-            if ((x + 1 < width) && !thisColor.equals(colorsTab[y][x + 1][z]))
+            if ((x + 1 < width) && thisColor!=colorsTab[y][x + 1][z])
                 return true;
-            if ((z + 1 < Z) && !thisColor.equals(colorsTab[y][x][z + 1]))
+            if ((z + 1 < Z) && thisColor!=colorsTab[y][x][z + 1])
                 return true;
-            if ((y - 1 >= 0) && !thisColor.equals(colorsTab[y - 1][x][z]))
+            if ((y - 1 >= 0) && thisColor!=colorsTab[y - 1][x][z])
                 return true;
-            if ((x - 1 >= 0) && !thisColor.equals(colorsTab[y][x - 1][z]))
+            if ((x - 1 >= 0) && thisColor!=colorsTab[y][x - 1][z])
                 return true;
-            return (z - 1 >= 0) && !thisColor.equals(colorsTab[y][x][z - 1]);
+            return (z - 1 >= 0) && thisColor!=colorsTab[y][x][z - 1];
         }
     }
 
